@@ -80,7 +80,7 @@ public class OrdersPresenter implements Presenter {
         ListGroup listGroup = new ListGroup();
         items.stream().forEach(i->{
             ListGroupItem listGroupItem = new ListGroupItem();
-            listGroupItem.setText(i.getName().concat("-").concat(i.getCode()).concat(" ").concat(String.valueOf(i.getPrice())));
+            listGroupItem.setText(i.getCode().concat("-").concat(i.getName()).concat(" ").concat("$"+i.getPrice()));
             listGroup.add(listGroupItem);
         });
         return listGroup;

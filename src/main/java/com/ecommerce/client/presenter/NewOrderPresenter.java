@@ -5,21 +5,21 @@ import com.ecommerce.client.events.AddInCartEvent;
 import com.ecommerce.client.view.NewOrderView;
 import com.ecommerce.dominio.Item;
 import com.ecommerce.dominio.Order;
+import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Widget;
 import org.gwtbootstrap3.client.ui.*;
-import org.gwtbootstrap3.client.ui.constants.ButtonSize;
-import org.gwtbootstrap3.client.ui.constants.ButtonType;
-import org.gwtbootstrap3.client.ui.constants.HeadingSize;
+import org.gwtbootstrap3.client.ui.constants.*;
 import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
 import org.gwtbootstrap3.client.ui.html.Paragraph;
 import org.gwtbootstrap3.extras.notify.client.ui.Notify;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class NewOrderPresenter implements Presenter {
 
@@ -49,6 +49,12 @@ public class NewOrderPresenter implements Presenter {
     }
 
     private void bind() {
+        display.getTextBoxSearch().addKeyDownHandler(e->{
+            String value = display.getTextBoxSearch().getValue();
+            if (e.getNativeKeyCode()== KeyCodes.KEY_ENTER && !value.isEmpty()){
+                searchProduct(display.getTextBoxSearch().getValue());
+            }
+        });
         display.getButtonSearch().addClickHandler(e->searchProduct(display.getTextBoxSearch().getValue()));
         display.getButtonCart().addClickHandler(e->showCart());
     }
@@ -136,21 +142,41 @@ public class NewOrderPresenter implements Presenter {
             ThumbnailPanel thumbnailPanel = new ThumbnailPanel();
             Caption caption = new Caption();
             Heading heading = new Heading(HeadingSize.H3);
-            heading.setText(r.getName().concat("-").concat(r.getCode()));
-            Paragraph paragraph = new Paragraph("Precio:"+r.getPrice());
+            heading.setText(r.getCode().concat("-").concat(r.getName()));
+            Paragraph paragraph = new Paragraph("Precio:$"+r.getPrice());
             Button button = new Button();
+            InputGroup inputGroup = new InputGroup();
+            InputGroupButton inputGroupButton = new InputGroupButton();
+            Button add = new Button();
+            add.setIcon(IconType.PLUS);
+            add.setSize(ButtonSize.EXTRA_SMALL);
+            add.setType(ButtonType.PRIMARY);
+            inputGroupButton.add(add);
+            InputGroupButton inputGroupButton1 = new InputGroupButton();
+            Button sub = new Button();
+            sub.setIcon(IconType.MINUS);
+            sub.setSize(ButtonSize.EXTRA_SMALL);
+            sub.setType(ButtonType.PRIMARY);
+            inputGroupButton1.add(sub);
+            IntegerBox cant = new IntegerBox();
+            cant.setValue(r.getQuantity());
+            inputGroup.add(inputGroupButton1);
+            inputGroup.add(cant);
+            inputGroup.add(inputGroupButton);
+            inputGroup.setSize(InputGroupSize.SMALL);
             button.setSize(ButtonSize.EXTRA_SMALL);
             caption.add(heading);
             caption.add(paragraph);
             if (b){
                 button.setType(ButtonType.PRIMARY);
                 button.setText("Agregar a carrito");
-                button.addClickHandler(e->addInCart(r));
+                button.addClickHandler(e->{r.setQuantity(cant.getValue());addInCart(r);});
             }else {
                 button.setType(ButtonType.DANGER);
                 button.setText("Eliminar del carrito");
                 button.addClickHandler(e->{removeOfCart(r);flowPanel.remove(thumbnailPanel);});
             }
+            caption.add(cant);
             caption.add(button);
             thumbnailPanel.add(caption);
             flowPanel.add(thumbnailPanel);
@@ -165,6 +191,10 @@ public class NewOrderPresenter implements Presenter {
     }
 
     private void addInCart(Item item) {
+        Optional<Item> first = items.stream().filter(i -> i.getCode().equals(item.getCode())).findFirst();
+        if (first.isPresent()){
+            items.remove(first.get());
+        }
         items.add(item);
         eventBus.fireEvent(new AddInCartEvent());
         Notify.notify("El producto se agregó al carrito");

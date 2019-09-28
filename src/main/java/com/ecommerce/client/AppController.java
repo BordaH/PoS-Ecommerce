@@ -1,5 +1,6 @@
 package com.ecommerce.client;
 
+import com.ecommerce.client.events.LoginEvent;
 import com.ecommerce.client.events.MenuEvent;
 import com.ecommerce.client.events.OrderEvent;
 import com.ecommerce.client.events.OrdersEvent;
@@ -35,8 +36,15 @@ public class AppController implements ValueChangeHandler<String> {
     private void bind() {
         History.addValueChangeHandler(this);
         eventBus.addHandler(MenuEvent.TYPE, menuEvent -> doMenu());
+        eventBus.addHandler(LoginEvent.TYPE, loginEvent -> doLogin());
         eventBus.addHandler(OrdersEvent.TYPE,ordersEvent -> doOrders(ordersEvent.getActivity()));
         eventBus.addHandler(OrderEvent.TYPE,orderEvent -> doOrder(orderEvent.activity));
+    }
+
+    private void doLogin() {
+        token= TokenConfiguration.MENU;
+        presenter = new MenuPresenter(new MenuView(),rpcEcommerce,eventBus,true);
+        presenter.go(RootPanel.get());
     }
 
     private void doOrders(VerticalPanel activity) {
@@ -54,7 +62,7 @@ public class AppController implements ValueChangeHandler<String> {
 
     private void doMenu() {
         token= TokenConfiguration.MENU;
-        presenter = new MenuPresenter(new MenuView(),rpcEcommerce,eventBus);
+        presenter = new MenuPresenter(new MenuView(),rpcEcommerce,eventBus, true);
         presenter.go(RootPanel.get());
     }
 

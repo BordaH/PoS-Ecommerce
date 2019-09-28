@@ -94,9 +94,11 @@ public class MenuView implements MenuPresenter.Display {
         email = new TextBox();
         email.setPlaceholder("Email");
         email.setSize(InputSize.SMALL);
+
         formGroup.add(email);
         FormGroup formGroup1 = new FormGroup();
         password = new TextBox();
+        password.getElement().setAttribute("type","password");
         password.setPlaceholder("Contraseña");
         password.setSize(InputSize.SMALL);
         formGroup1.add(password);
@@ -175,5 +177,15 @@ public class MenuView implements MenuPresenter.Display {
     @Override
     public AnchorListItem getButtonOrders() {
         return orders;
+    }
+
+    @Override
+    public TextBox getTextBoxEmail() {
+        return email;
+    }
+
+    @Override
+    public TextBox getTextBoxPassword() {
+        return password;
     }
 }

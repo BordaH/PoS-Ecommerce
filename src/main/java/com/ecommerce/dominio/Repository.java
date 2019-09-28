@@ -10,6 +10,7 @@ public class Repository implements Serializable {
     private static Repository instance;
     private List<Order> orders;
     private List<Item> items;
+    private List<User> users;
 
     private Repository(){
         orders = new ArrayList<>();
@@ -20,7 +21,10 @@ public class Repository implements Serializable {
         items = new ArrayList<>();
         items.addAll(Arrays.asList(new Item("Producto1","cod1",100.00),
                 new Item("Prod2","cod2",20.00),
-                new Item("Prod3","cod3",10000.00)));    
+                new Item("Prod3","cod3",10000.00)));
+
+        users = new ArrayList<>();
+        users.addAll(Arrays.asList(new User("Henry","Borda","henryborda17@gmail.com","henry123",40498178)));
     }
 
     public static Repository getInstance() {
@@ -45,5 +49,9 @@ public class Repository implements Serializable {
 
     public List<Order> orders() {
         return orders;
+    }
+
+    public List<User> users() {
+        return users;
     }
 }
