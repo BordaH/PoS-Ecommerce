@@ -1,15 +1,10 @@
 package com.ecommerce.client.view;
 
 import com.ecommerce.client.presenter.NewOrderPresenter;
-import com.ecommerce.dominio.Item;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
 import org.gwtbootstrap3.client.ui.*;
 import org.gwtbootstrap3.client.ui.constants.*;
 import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
-import org.gwtbootstrap3.client.ui.html.Paragraph;
-
-import java.util.List;
 
 public class NewOrderView implements NewOrderPresenter.Display {
     private FlowPanel rootPanel;
@@ -20,6 +15,7 @@ public class NewOrderView implements NewOrderPresenter.Display {
     public NewOrderView(){
         rootPanel = new FlowPanel();
         rootPanel.add(panelSearch());
+
     }
 
     private Widget panelSearch() {
@@ -75,8 +71,7 @@ public class NewOrderView implements NewOrderPresenter.Display {
     }
 
     @Override
-    public void showItems(FlowPanel flowPanel) {
-
+    public void showItems(Row flowPanel) {
         rootPanel.add(flowPanel);
     }
 

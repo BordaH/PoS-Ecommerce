@@ -18,11 +18,13 @@ public interface EcommerceService extends RemoteService {
 
     List<Item> getProduct(String text);
 
-    Order createOrder(String email, String dom, String phone, String note, List<Item> items);
+    Order createOrder(String name, String email, String dom, String phone, String note, List<Item> items);
 
     List<Order> getOrders();
 
     User logOut();
 
     String loginGuest();
+
+    List<Order> getOrder(String value);
 }

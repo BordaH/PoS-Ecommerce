@@ -2,6 +2,7 @@ package com.ecommerce.client.presenter;
 
 import com.ecommerce.client.EcommerceServiceAsync;
 import com.ecommerce.client.events.AddInCartEvent;
+import com.ecommerce.client.view.ItemOrderView;
 import com.ecommerce.client.view.NewOrderView;
 import com.ecommerce.dominio.Item;
 import com.ecommerce.dominio.Order;
@@ -9,12 +10,12 @@ import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.shared.HandlerManager;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HasWidgets;
+import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import org.gwtbootstrap3.client.ui.*;
 import org.gwtbootstrap3.client.ui.constants.*;
-import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
-import org.gwtbootstrap3.client.ui.html.Paragraph;
 import org.gwtbootstrap3.extras.notify.client.ui.Notify;
 
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class NewOrderPresenter implements Presenter {
         Widget asWidget();
         Button getButtonSearch();
         TextBox getTextBoxSearch();
-        void showItems(FlowPanel result);
+        void showItems(Row result);
         AnchorListItem getButtonCart();
     }
 
@@ -52,16 +53,22 @@ public class NewOrderPresenter implements Presenter {
         display.getTextBoxSearch().addKeyDownHandler(e->{
             String value = display.getTextBoxSearch().getValue();
             if (e.getNativeKeyCode()== KeyCodes.KEY_ENTER && !value.isEmpty()){
+                display.getButtonSearch().click();
+            }
+        });
+        display.getButtonSearch().addClickHandler(e->{
+            String value = display.getTextBoxSearch().getValue();
+            if (!value.isEmpty()){
                 searchProduct(display.getTextBoxSearch().getValue());
             }
         });
-        display.getButtonSearch().addClickHandler(e->searchProduct(display.getTextBoxSearch().getValue()));
         display.getButtonCart().addClickHandler(e->showCart());
     }
 
     private void showCart() {
         Modal modal = new Modal();
         modal.setTitle("Carrito");
+        modal.setSize(ModalSize.LARGE);
         ModalBody modalBody = new ModalBody();
         modalBody.add(createItems(items,false));
         Button confirm = new Button("Continuar pedido");
@@ -77,6 +84,8 @@ public class NewOrderPresenter implements Presenter {
         Modal modal = new Modal();
         ModalBody modalBody = new ModalBody();
         Form form = new Form();
+        TextBox name = new TextBox();
+        name.setPlaceholder("Nombre y apellido");
         TextBox email = new TextBox();
         email.setPlaceholder("Email");
         TextBox dom = new TextBox();
@@ -88,8 +97,9 @@ public class NewOrderPresenter implements Presenter {
         Button button = new Button("Enviar pedido");
         button.setType(ButtonType.PRIMARY);
         button.setSize(ButtonSize.SMALL);
-        button.addClickHandler(e->sendOrder(email.getValue(),dom.getValue(),phone.getValue(),textArea.getValue(),items));
+        button.addClickHandler(e->sendOrder(name.getValue(),email.getValue(),dom.getValue(),phone.getValue(),textArea.getValue(),items));
         FieldSet fieldSet = new FieldSet();
+        fieldSet.add(name);
         fieldSet.add(email);
         fieldSet.add(dom);
         fieldSet.add(phone);
@@ -98,12 +108,13 @@ public class NewOrderPresenter implements Presenter {
         form.add(fieldSet);
         modalBody.add(form);
         modal.add(modalBody);
+        modal.setTitle("Complete sus datos");
         modal.show();
     }
 
-    private void sendOrder(String email, String dom, String phone, String note, List<Item> items) {
-        if (!email.isEmpty()&&!dom.isEmpty()&&!phone.isEmpty() && !items.isEmpty()){
-            rpcEcommerce.createOrder(email,dom,phone,note,items, new AsyncCallback<Order>() {
+    private void sendOrder(String name, String email, String dom, String phone, String note, List<Item> items) {
+        if (!name.isEmpty()&&!email.isEmpty()&&!dom.isEmpty()&&!phone.isEmpty() && !items.isEmpty()){
+            rpcEcommerce.createOrder(name,email,dom,phone,note,items, new AsyncCallback<Order>() {
                 @Override
                 public void onFailure(Throwable caught) {
                     caught.printStackTrace();
@@ -136,53 +147,28 @@ public class NewOrderPresenter implements Presenter {
         });
     }
 
-    private FlowPanel createItems(List<Item> result,boolean b) {
-        org.gwtbootstrap3.client.ui.gwt.FlowPanel flowPanel= new org.gwtbootstrap3.client.ui.gwt.FlowPanel();
+    private Row createItems(List<Item> result, boolean b) {
+        Row row= new Row();
         result.stream().forEach(r->{
-            ThumbnailPanel thumbnailPanel = new ThumbnailPanel();
-            Caption caption = new Caption();
-            Heading heading = new Heading(HeadingSize.H3);
-            heading.setText(r.getCode().concat("-").concat(r.getName()));
-            Paragraph paragraph = new Paragraph("Precio:$"+r.getPrice());
-            Button button = new Button();
-            InputGroup inputGroup = new InputGroup();
-            InputGroupButton inputGroupButton = new InputGroupButton();
-            Button add = new Button();
-            add.setIcon(IconType.PLUS);
-            add.setSize(ButtonSize.EXTRA_SMALL);
-            add.setType(ButtonType.PRIMARY);
-            inputGroupButton.add(add);
-            InputGroupButton inputGroupButton1 = new InputGroupButton();
-            Button sub = new Button();
-            sub.setIcon(IconType.MINUS);
-            sub.setSize(ButtonSize.EXTRA_SMALL);
-            sub.setType(ButtonType.PRIMARY);
-            inputGroupButton1.add(sub);
-            IntegerBox cant = new IntegerBox();
-            cant.setValue(r.getQuantity());
-            inputGroup.add(inputGroupButton1);
-            inputGroup.add(cant);
-            inputGroup.add(inputGroupButton);
-            inputGroup.setSize(InputGroupSize.SMALL);
-            button.setSize(ButtonSize.EXTRA_SMALL);
-            caption.add(heading);
-            caption.add(paragraph);
+            FlowPanel flowPanel = new FlowPanel();
+            ItemOrderView itemOrder = new ItemOrderView(r);
             if (b){
-                button.setType(ButtonType.PRIMARY);
-                button.setText("Agregar a carrito");
-                button.addClickHandler(e->{r.setQuantity(cant.getValue());addInCart(r);});
+                itemOrder.getButton().setType(ButtonType.PRIMARY);
+                itemOrder.getButton().setText("Agregar a carrito");
+                itemOrder.getButton().addClickHandler(e->{r.setQuantity(itemOrder.getTextBoxQuantity().getValue());addInCart(r);});
             }else {
-                button.setType(ButtonType.DANGER);
-                button.setText("Eliminar del carrito");
-                button.addClickHandler(e->{removeOfCart(r);flowPanel.remove(thumbnailPanel);});
+                itemOrder.getButton().setType(ButtonType.DANGER);
+                itemOrder.getButton().setText("Eliminar del carrito");
+                itemOrder.getButton().addClickHandler(e->{removeOfCart(r); flowPanel.remove(itemOrder);});
             }
-            caption.add(cant);
-            caption.add(button);
-            thumbnailPanel.add(caption);
-            flowPanel.add(thumbnailPanel);
+            flowPanel.addStyleName("col-sm-6 col-md-4");
+            flowPanel.add(itemOrder);
+            row.add(flowPanel);
+
         });
-        display.showItems(flowPanel);
-        return  flowPanel;
+
+        display.showItems(row);
+        return  row;
     }
 
     private void removeOfCart(Item r) {

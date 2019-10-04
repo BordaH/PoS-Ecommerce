@@ -14,9 +14,9 @@ public class Repository implements Serializable {
 
     private Repository(){
         orders = new ArrayList<>();
-        orders.addAll(Arrays.asList(new Order("email@gmail.com","dom piso1","111","nota",
+        orders.addAll(Arrays.asList(new Order("id123","cod01","Henry Borda","email@gmail.com","dom piso1","111","nota",
                         Arrays.asList(new Item("Producto1","COD1",100.10))),
-                new Order("email@gmail.com","dom piso1","111","nota2",
+                new Order("id456","cod02","Juan Gomez","email@gmail.com","dom piso1","111","nota2",
                         Arrays.asList(new Item("Producto2","COD2",200.00),new Item("Producto3","COD3",20.00)))));
         items = new ArrayList<>();
         items.addAll(Arrays.asList(new Item("Producto1","cod1",100.00),

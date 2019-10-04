@@ -22,20 +22,5 @@ public class Ecommerce implements EntryPoint {
         final HandlerManager eventBus = new HandlerManager(null);
         AppController appViewer = new AppController(rpcEcommerce, eventBus);
         eventBus.fireEvent(new MenuEvent());
-        /*rpcEcommerce.userOfsession(new AsyncCallback<User>() {
-            @Override
-            public void onFailure(Throwable caught) {
-               caught.printStackTrace();
-            }
-
-            @Override
-            public void onSuccess(User result) {
-           //     if (result==null){
-
-              *//*  }else {
-                    eventBus.fireEvent(new LoginEvent());
-                }*//*
-            }
-        });*/
     }
 }

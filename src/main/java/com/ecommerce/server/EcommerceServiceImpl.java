@@ -13,6 +13,7 @@ import java.math.BigInteger;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public class EcommerceServiceImpl extends RemoteServiceServlet implements EcommerceService {
@@ -34,13 +35,16 @@ public class EcommerceServiceImpl extends RemoteServiceServlet implements Ecomme
 
     @Override
     public List<Item> getProduct(String text) {
-        return Repository.getInstance().items().stream().filter(p->p.getName().contains(text)||p.getCode().contains(text)).collect(Collectors.toList());
+        List<Item> collect = Repository.getInstance().items().stream()
+                .filter(p -> p.getName().contains(text) || p.getCode().contains(text))
+                .collect(Collectors.toList());
+        return collect;
     }
 
     @Override
-    public Order createOrder(String email, String dom, String phone, String note, List<Item> items)
-    {
-        return Repository.getInstance().addOrder(new Order(email,dom,phone,note,items));
+    public Order createOrder(String name, String email, String dom, String phone, String note, List<Item> items) {
+            return Repository.getInstance()
+                    .addOrder(new Order(UUID.randomUUID().toString(),UUID.randomUUID().toString(),name,email,dom,phone,note,items));
     }
 
     @Override
@@ -52,16 +56,25 @@ public class EcommerceServiceImpl extends RemoteServiceServlet implements Ecomme
     public User logOut() {
         HttpServletRequest httpServletRequest = this.getThreadLocalRequest();
         HttpSession session = httpServletRequest.getSession(false);
-        User user = (User) session.getAttribute((String) session.getAttribute("id"));
-        session.removeAttribute("id");
-        session.removeAttribute((String) session.getAttribute("id"));
-        session.invalidate();
+        String id = (String) session.getAttribute("id");
+        User user =null;
+        if (id!=null){
+            user = (User) session.getAttribute(id);
+            session.removeAttribute("id");
+            session.removeAttribute(id);
+            session.invalidate();
+        }
         return user;
     }
 
     @Override
     public String loginGuest() {
         return getSessionIdFor("guest");
+    }
+
+    @Override
+    public List<Order> getOrder(String value) {
+        return Repository.getInstance().orders().stream().filter(o->o.getCode().contains(value)).collect(Collectors.toList());
     }
 
     public boolean checkDataLogin(String email, String password) throws LoginException {
