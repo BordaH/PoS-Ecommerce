@@ -1,5 +1,4 @@
 # PoS-Ecommerce
-![alt text](https://github.com/BordaH/PoS-Ecommerce/blob/master/logo/logo.png)
 
 ## ¿Que es PoS-Ecommerce? 
 **PoS-Ecommerce** es una aplicación que se utiliza en cualquier dispositivo y sus funciones principales son: tener el control de los pedidos que relizan tus clientes y control del stock de los productos. 
