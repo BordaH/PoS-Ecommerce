@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact name="wa2:GWT">
+    <output-path>$PROJECT_DIR$/classes/artifacts/wa2_GWT</output-path>
+    <root id="root">
+      <element id="gwt-compiler-output" facet="Ecommerce/gwt/GWT" />
+    </root>
+  </artifact>
+</component>

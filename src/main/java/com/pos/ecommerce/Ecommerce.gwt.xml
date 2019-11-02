@@ -1,0 +1,18 @@
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0//EN"
+        "http://google-web-toolkit.googlecode.com/svn/releases/2.0/distro-source/core/src/gwt-module.dtd">
+<module rename-to="Ecommerce">
+
+    <!-- Inherit the core Web Toolkit stuff.                  -->
+    <inherits name='com.google.gwt.user.User'/>
+    <inherits name="org.gwtbootstrap3.GwtBootstrap3"/>
+    <inherits name="org.gwtbootstrap3.extras.notify.Notify"/>
+    <!--<inherits name='cz.cvut.wa2.wa2'/>-->
+    <!--<source path="Car"></source>-->
+
+    <!-- Specify the app entry point class.                   -->
+    <entry-point class='com.pos.ecommerce.client.Ecommerce'/>
+
+
+    <!-- Specify the app servlets.                   -->
+    <servlet path='/EcommerceService' class='com.pos.ecommerce.server.EcommerceServiceImpl'/>
+</module>

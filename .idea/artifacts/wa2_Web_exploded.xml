@@ -1,0 +1,17 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="wa2:Web exploded">
+    <output-path>$PROJECT_DIR$/classes/artifacts/wa2_Web_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="Ecommerce/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="javaee-facet-classes" facet="Ecommerce/web/Web" />
+        </element>
+        <element id="directory" name="lib">
+          <element id="file-copy" path="$PROJECT_DIR$/../gwt-2.8.2 (1)/gwt-2.8.2/gwt-servlet.jar" />
+        </element>
+      </element>
+      <element id="gwt-compiler-output" facet="Ecommerce/gwt/GWT" />
+    </root>
+  </artifact>
+</component>
