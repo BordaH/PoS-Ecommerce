@@ -9,3 +9,12 @@ h1 {
 body, td, a, div, .p {
     font-family: arial, sans-serif
 }
+
+.gwtb3-d {
+    font-size: 11px;
+    text-align: right;
+}
+.gwtb3-cell{
+    font-size: 11px;
+    text-align: right;
+}

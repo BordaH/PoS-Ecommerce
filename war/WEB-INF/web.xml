@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
-         version="4.0">
+<web-app xmlns="http://java.sun.com/xml/ns/javaee"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://java.sun.com/xml/ns/javaee
+		  http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+           version="3.0">
+
     <servlet>
-        <servlet-name>com.ecommerce.Ecommerce EcommerceService</servlet-name>
-        <servlet-class>com.ecommerce.server.EcommerceServiceImpl</servlet-class>
+        <servlet-name>EcommerceService</servlet-name>
+        <servlet-class>com.pos.ecommerce.server.EcommerceServiceImpl</servlet-class>
     </servlet>
     <servlet-mapping>
-        <servlet-name>com.ecommerce.Ecommerce EcommerceService</servlet-name>
+        <servlet-name>EcommerceService</servlet-name>
         <url-pattern>/Ecommerce/EcommerceService</url-pattern>
     </servlet-mapping>
 </web-app>
