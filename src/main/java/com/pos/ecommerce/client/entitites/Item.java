@@ -1,12 +1,14 @@
 package com.pos.ecommerce.client.entitites;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 import javax.persistence.*;
 import java.io.Serializable;
 
 @Entity
 @Table(name = "items" ,uniqueConstraints = {
         @UniqueConstraint(columnNames = "id")})
-public class Item {
+public class Item  implements IsSerializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

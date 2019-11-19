@@ -56,7 +56,7 @@ public class OrdersView implements OrdersPresenter.Display {
         TextColumn<OrderDTO> colCode = new TextColumn<OrderDTO>() {
             @Override
             public String getValue(OrderDTO object) {
-                return object.getCode();
+                return String.valueOf(object.getCode());
             }
         };
 

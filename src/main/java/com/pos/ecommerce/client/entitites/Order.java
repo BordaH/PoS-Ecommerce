@@ -1,6 +1,11 @@
 package com.pos.ecommerce.client.entitites;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+import org.hibernate.annotations.GenerationTime;
+
+import javax.annotation.Generated;
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -8,11 +13,11 @@ import java.util.stream.DoubleStream;
 
 @Entity
 @Table(name = "orders")
-public class Order {
+public class Order  implements IsSerializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="id", unique=true, nullable=false)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name="code", unique=true, nullable=false)
+    private Long code;
 
     @ManyToOne(targetEntity=Client.class, cascade=CascadeType.ALL)
     private Client user ;
@@ -21,7 +26,6 @@ public class Order {
     @OneToMany(cascade=CascadeType.ALL)
     @JoinColumn(name="order_id")
     private List<Item> items= new ArrayList<>();
-    private String code;
 
     public Date getDate() {
         return date;
@@ -62,23 +66,15 @@ public class Order {
         this.items = items;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public Double getTotal() {
         return items.stream().filter(i->i!=null).flatMapToDouble(item -> DoubleStream.of(item.getPrice()*item.getQuantity())).sum()-amountDiscount;
     }
 
-    public String getCode() {
+    public Long getCode() {
         return code;
     }
 
-    public void setCode(String code) {
+    public void setCode(Long code) {
         this.code = code;
     }
 

@@ -69,7 +69,6 @@ public class EcommerceServiceImpl extends RemoteServiceServlet implements Ecomme
     @Override
     public OrderDTO sendOrder(OrderDTO order) {
         order.setConfirm(true);
-        order.setCode(UUID.randomUUID().toString());
         Order order1 = createOrder(order);
         return saveOrder(order1)==null?null:order;
     }
@@ -84,7 +83,6 @@ public class EcommerceServiceImpl extends RemoteServiceServlet implements Ecomme
         order.setAmountDiscount(orderDTO.getAmountDiscount());
         order.setDisount(orderDTO.getDisount());
         order.setConfirm(orderDTO.getConfirm());
-        order.setId(orderDTO.getId());
         return order;
     }
 
@@ -124,7 +122,6 @@ public class EcommerceServiceImpl extends RemoteServiceServlet implements Ecomme
         order.setDisount(o.getDisount());
         order.setCode(o.getCode());
         order.setConfirm(o.getConfirm());
-        order.setId(o.getId());
         order.setItems(createItemsDTO(o.getItems()));
         order.setNote(o.getNote());
         order.setDate(o.getDate());
@@ -162,7 +159,7 @@ public class EcommerceServiceImpl extends RemoteServiceServlet implements Ecomme
 
     @Override
     public OrderDTO confirmOrder(OrderDTO orderDTO) {
-        Order order = getOrderDAOImpl().getOrderForId(orderDTO.getId());
+        Order order = getOrderDAOImpl().getOrderForId(orderDTO.getCode());
         order.setConfirm(true);
         if (getOrderDAOImpl().saveOrder(order) != null) {
             orderDTO.setConfirm(true);
@@ -175,7 +172,7 @@ public class EcommerceServiceImpl extends RemoteServiceServlet implements Ecomme
     @Override
     public OrderDTO sendOrderGuest(OrderDTO order) {
         order.setConfirm(false);
-        order.setCode(UUID.randomUUID().toString());
+      //  order.setCode(UUID.randomUUID().toString());
         Order order1 = createOrder(order);
         order1.getUser().setGuest(true);
         logOut();

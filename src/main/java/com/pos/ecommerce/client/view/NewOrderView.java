@@ -1,6 +1,7 @@
 package com.pos.ecommerce.client.view;
 
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.pos.ecommerce.client.constants.HeaderConstanst;
 import com.pos.ecommerce.client.dto.*;
@@ -16,6 +17,7 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import org.gwtbootstrap3.client.ui.*;
+import org.gwtbootstrap3.client.ui.base.form.AbstractForm;
 import org.gwtbootstrap3.client.ui.constants.*;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.gwt.DataGrid;
@@ -61,6 +63,11 @@ public class NewOrderView implements NewOrderPresenterGuest.Display {
     private FlowPanel panelAmountAndDiscount;
     private Button clearClient;
     private Heading heading;
+    private Form formUser;
+    private FieldSet fieldSetUser;
+    private Form formAmount;
+    private FieldSet fieldSetAmount;
+    private HelpBlock helpBlockEmail;
 
     public NewOrderView(){
         initModalUsers();
@@ -135,10 +142,16 @@ public class NewOrderView implements NewOrderPresenterGuest.Display {
             }
         });
         panelAmountAndDiscount = new FlowPanel();
-        panelAmountAndDiscount.add(createFormGroup("Descuento a aplicar(%):",textBoxDiscount));
-        panelAmountAndDiscount.add(createFormGroup("Descuento aplicado(%):",discountApply));
-        panelAmountAndDiscount.add(createFormGroup("Monto descuento:",amountDiscount));
-        panelAmountAndDiscount.add(createFormGroup("Total:",total));
+        formAmount = new Form();
+        fieldSetAmount = new FieldSet();
+        fieldSetAmount.getElement().getStyle().setTextAlign(Style.TextAlign.RIGHT);
+        formAmount.setType(FormType.INLINE);
+        createFormGroup("Descuento a aplicar(%):",textBoxDiscount, fieldSetAmount);
+        createFormGroup("Descuento aplicado(%):",discountApply, fieldSetAmount);
+        createFormGroup("Monto descuento:",amountDiscount, fieldSetAmount);
+        createFormGroup("Total:",total, fieldSetAmount);
+        formAmount.add(fieldSetAmount);
+        panelAmountAndDiscount.add(formAmount);
         return panelAmountAndDiscount;
     }
     private boolean isNotSpecialKey(KeyPressEvent event) {
@@ -206,13 +219,14 @@ public class NewOrderView implements NewOrderPresenterGuest.Display {
         dataGridItems.addColumn(delete,"");
         dataGridItems.setWidth("100%");
         ScrollPanel scrollPanel = new ScrollPanel(dataGridItems);
-        scrollPanel.setSize("100%","150px");
+        scrollPanel.setWidth("100%");
         return scrollPanel;
     }
 
     private IsWidget createDataUserCart() {
         nameUserCart = new TextBox();
         emailUserCart = new TextBox();
+        helpBlockEmail = new HelpBlock();
         domUserCart = new TextBox();
         phoneUserCart = new TextBox();
         phoneUserCart.addKeyPressHandler(event -> {
@@ -252,11 +266,17 @@ public class NewOrderView implements NewOrderPresenterGuest.Display {
     }
     private IsWidget createDataCart() {
         panelClient = new FlowPanel();
-        panelClient.add(createFormGroup("Nombre y apellido:",nameUserCart));
-        panelClient.add(createFormGroup("Email:",emailUserCart));
-        panelClient.add(createFormGroup("Documento:",dniUSerCart));
-        panelClient.add(createFormGroup("Domicilio:",domUserCart));
-        panelClient.add(createFormGroup("Telefono:",phoneUserCart));
+        fieldSetUser = new FieldSet();
+        formUser = new Form();
+        formUser.setType(FormType.INLINE);
+        formUser.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+        createFormGroup("Nombre y apellido:",nameUserCart,fieldSetUser);
+        createFormGroup("Email:",emailUserCart, fieldSetUser);
+        createFormGroup("Documento:",dniUSerCart, fieldSetUser);
+        createFormGroup("Domicilio:",domUserCart, fieldSetUser);
+
+        formUser.add(fieldSetUser);
+        panelClient.add(formUser);
         ButtonGroup buttonGroup = new ButtonGroup();
         clearClient = new Button();
         clearClient.setIcon(IconType.REMOVE);
@@ -265,6 +285,7 @@ public class NewOrderView implements NewOrderPresenterGuest.Display {
         clearClient.setVisible(false);
         buttonGroup.add(users);
         buttonGroup.add(clearClient);
+        Button v  =new Button();
         panelClient.add(buttonGroup);
         return panelClient;
     }
@@ -310,12 +331,21 @@ public class NewOrderView implements NewOrderPresenterGuest.Display {
         return panelBody;
     }
 
-
-    private IsWidget createFormGroup(String field, Widget formControlStatic) {
-        Form group = new Form();
-        group.setType(FormType.INLINE);
-        group.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
-        FieldSet fieldSet = new FieldSet();
+    private IsWidget createFormGroup(String field, Widget formControlStatic,FieldSet fieldSet) {
+        FormLabel formLabel = new FormLabel();
+        formLabel.setText(field);
+        formLabel.getElement().getStyle().setFontSize(12, Style.Unit.PX);
+        formLabel.setFor("form");
+        formLabel.setMarginTop(5);
+        formLabel.addStyleName("col-sm-6");
+        org.gwtbootstrap3.client.ui.gwt.FlowPanel flowPanel = new org.gwtbootstrap3.client.ui.gwt.FlowPanel();
+        flowPanel.add(formControlStatic);
+        formControlStatic.addStyleName("col-sm-5");
+        fieldSet.add(formLabel);
+        fieldSet.add(formControlStatic);
+        return fieldSet;
+    }
+    private IsWidget createFormGroup(String field, Widget formControlStatic, HelpBlock helpBlock,FieldSet fieldSet) {
         FormLabel formLabel = new FormLabel();
         formLabel.setText(field);
         formLabel.getElement().getStyle().setFontSize(12, Style.Unit.PX);
@@ -324,12 +354,15 @@ public class NewOrderView implements NewOrderPresenterGuest.Display {
         formLabel.addStyleName("col-sm-5");
         org.gwtbootstrap3.client.ui.gwt.FlowPanel flowPanel = new org.gwtbootstrap3.client.ui.gwt.FlowPanel();
         flowPanel.add(formControlStatic);
+        flowPanel.add(helpBlock);
         formControlStatic.addStyleName("col-sm-3 col-md-7");
+        FormGroup formGroup = new FormGroup();
+        formGroup.add(formLabel);
+
         fieldSet.add(formLabel);
         fieldSet.add(formControlStatic);
         //  fieldSet.addStyleName("col-sm-3 col-md-7");
-        group.add(fieldSet);
-        return group;
+        return fieldSet;
     }
     private Widget panelSearch() {
         Navbar navbar = new Navbar();
@@ -556,6 +589,11 @@ public class NewOrderView implements NewOrderPresenterGuest.Display {
     @Override
     public Heading getHeadinCart() {
         return heading;
+    }
+
+    @Override
+    public Form getFormClient() {
+        return formUser;
     }
 
     @Override

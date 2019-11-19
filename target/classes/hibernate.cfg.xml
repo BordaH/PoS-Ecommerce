@@ -13,7 +13,7 @@
         <property name="hibernate.connection.password">admin</property>
         <property name="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</property>
         <property name="connection.pool_size">10</property>
-     <property name="hibernate.hbm2ddl.auto">update</property>
+        <property name="hibernate.hbm2ddl.auto">update</property>
         <!--<property name="hibernate.hbm2ddl.auto">create-drop</property>-->
 
         <mapping class="com.pos.ecommerce.client.entitites.User"/>

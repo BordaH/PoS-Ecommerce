@@ -1,11 +1,12 @@
 package com.pos.ecommerce.client.entitites;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
         @UniqueConstraint(columnNames = "id") })
-public class User {
+public class User  implements Serializable {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)

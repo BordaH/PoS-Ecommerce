@@ -25,10 +25,11 @@ public class OrderDAOImpl implements OrderDAO {
     }
 
     @Override
+
     public Order saveOrder(Order order) {
             final Transaction transaction = session.beginTransaction();
             try {
-                session.saveOrUpdate(order);
+                session.merge(order);
                 transaction.commit();
                 return order;
             } catch (Exception ex) {
@@ -46,14 +47,14 @@ public class OrderDAOImpl implements OrderDAO {
     @Override
     public List<Order> getOrder(String value) {
         return (List<Order>) session.createCriteria(Order.class)
-                .add(Restrictions.like("code", "%"+value+"%"))
+                .add(Restrictions.eq("code", Long.valueOf(value)))
                 .list();
     }
 
     @Override
     public Order getOrderForId(Long id) {
         return (Order) session.createCriteria(Order.class)
-                .add(Restrictions.eq("id", id))
+                .add(Restrictions.eq("code", id))
                 .uniqueResult();
     }
 

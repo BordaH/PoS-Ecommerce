@@ -1,10 +1,11 @@
 package com.pos.ecommerce.client.entitites;
 
 import javax.persistence.*;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "products" )
-public class Product {
+public class Product  implements Serializable {
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)

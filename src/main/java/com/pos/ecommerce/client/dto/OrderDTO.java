@@ -10,8 +10,7 @@ public class OrderDTO implements Serializable {
     private UserDTO user ;
     private  String note="";
     private  List<ItemDTO> items= new ArrayList<>();
-    private Long id;
-    private String code;
+    private Long code;
     private boolean confirm = false;
     private double amountDiscount=0.00;
     private Integer discount=0;
@@ -42,23 +41,15 @@ public class OrderDTO implements Serializable {
         this.items = items;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public Double getTotal() {
         return items.stream().filter(i->i!=null).flatMapToDouble(item -> DoubleStream.of(item.getPrice()*item.getQuantity())).sum()-amountDiscount;
     }
 
-    public String getCode() {
+    public Long getCode() {
         return code;
     }
 
-    public void setCode(String code) {
+    public void setCode(Long code) {
         this.code = code;
     }
 
@@ -100,5 +91,20 @@ public class OrderDTO implements Serializable {
 
     public Date getDate() {
         return date;
+    }
+
+    public void removeItem(ItemDTO itemDTO) {
+        items.stream().forEach(i->{
+            if(itemDTO.getCode().equals(i.getCode())){
+                items.remove(i);
+                checkDiscount();
+            }
+        });
+    }
+
+    private void checkDiscount() {
+        if (items.isEmpty()){
+            amountDiscount=0.00;
+        }
     }
 }

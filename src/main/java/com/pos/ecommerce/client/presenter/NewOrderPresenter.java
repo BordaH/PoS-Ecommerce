@@ -1,6 +1,8 @@
 package com.pos.ecommerce.client.presenter;
 
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.editor.client.Editor;
+import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.event.dom.client.DoubleClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -25,12 +27,15 @@ import com.pos.ecommerce.client.view.ItemOrderView;
 import com.pos.ecommerce.client.view.NewOrderView;
 import org.gwtbootstrap3.client.ui.*;
 import org.gwtbootstrap3.client.ui.constants.ButtonType;
+import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
+import org.gwtbootstrap3.client.ui.form.validator.Validator;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.gwt.DataGrid;
 import org.gwtbootstrap3.client.ui.html.Paragraph;
 import org.gwtbootstrap3.extras.notify.client.ui.Notify;
 import org.gwtbootstrap3.extras.notify.client.ui.NotifySettings;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -106,6 +111,8 @@ public class NewOrderPresenter implements Presenter {
         TextBox getTextBoxDni();
 
         Heading getHeadinCart();
+
+        Form getFormClient();
     }
     public NewOrderPresenter() {
 
@@ -122,12 +129,13 @@ public class NewOrderPresenter implements Presenter {
     }
 
     protected void updateCart(String message) {
+        applyDiscount(String.valueOf(order.getDisount()));
         display.setItems(order.getItems());
-        display.getFormControlAmountDiscount().setText("$"+order.getAmountDiscount());
-        display.getFormControlDiscount().setText(String.valueOf(order.getDisount()));
         Double total = order.getTotal();
         display.getFormControlTotal().setText("$"+ total);
         display.getHeadinCart().setSubText("Total:$ "+ total);
+        display.getFormControlAmountDiscount().setText("$"+order.getAmountDiscount());
+        display.getFormControlDiscount().setText(String.valueOf(order.getDisount()));
         if (!message.isEmpty()){
             NotifySettings ns = NotifySettings.newSettings();
             ns.setDelay(2);
@@ -152,22 +160,40 @@ public class NewOrderPresenter implements Presenter {
         boolean b = name.matches(".*\\d.*");
         boolean b1 = name.isEmpty();
         if (b || b1){
-            throw new Exception("Revise los campos nombre o apellido");
+            throw new Exception("Revise los campos nombre y/o apellido");
         }
         return !b1 && !b;
     }
     protected void bind() {
+        display.getTextBoxEmail().addValidator(new Validator<String>() {
+            @Override
+            public int getPriority() {
+                return Priority.MEDIUM;
+            }
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String s) {
+                List<EditorError> result = new ArrayList<EditorError>();
+                String valueStr = s == null ? "" : s;
+                if (!("Yes".equalsIgnoreCase(valueStr) || "No".equalsIgnoreCase(valueStr))) {
+                    result.add(new BasicEditorError(display.getTextBoxEmail(), s, "Must be \"Yes\" or \"No\""));
+                }
+
+                return result;
+            }
+        });
         display.getButtonClearClient().addClickHandler(e->removeDataClient());
         display.getTextBoxDiscount().addKeyUpHandler(e->{
             if(!display.getTextBoxDiscount().getValue().isEmpty() && e.getNativeKeyCode()==KeyCodes.KEY_ENTER){
                 applyDiscount(display.getTextBoxDiscount().getValue());
+                eventBus.fireEvent(new UpdateCart(""));
                 display.getTextBoxDiscount().setText("");
             }
         });
         display.getColumnDelete().setFieldUpdater(new FieldUpdater<ItemDTO, String>() {
             @Override
             public void update(int index, ItemDTO object, String value) {
-                order.getItems().remove(index);
+                order.removeItem(object);
                 eventBus.fireEvent(new UpdateCart("Producto eliminado"));
             }
         });
@@ -232,7 +258,7 @@ public class NewOrderPresenter implements Presenter {
         double amountDiscount = integer*order.getTotal() / 100;
         order.setAmountDiscount(amountDiscount);
         order.setDisount(integer);
-        eventBus.fireEvent(new UpdateCart(""));
+
     }
 
 
@@ -278,7 +304,7 @@ public class NewOrderPresenter implements Presenter {
 
                 @Override
                 public void onSuccess(OrderDTO result) {
-                    if (result!=null &&result.getCode()!=null){
+                    if (result!=null){
                         Modal modal = new Modal();
                         modal.setTitle("¡Ecommerce!");
                         ModalBody modalBody = new ModalBody();
