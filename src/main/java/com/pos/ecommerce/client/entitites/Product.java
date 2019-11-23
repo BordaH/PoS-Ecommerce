@@ -8,21 +8,23 @@ import java.io.Serializable;
 public class Product  implements Serializable {
 
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     private Long id;
+
     private  String name;
     private  String code;
     private  Double price;
     private Integer quantity;
 
-    public Product(){
+    public Product(String name, String code, Double price, Integer quantity){
 
-    }
-    public Product(String name,String code,Double price){
-        this.quantity=1;
         this.name = name;
         this.code = code;
         this.price = price;
+        this.quantity = quantity;
+    }
+
+    public Product() {
     }
 
     public String getName() {
@@ -66,7 +68,6 @@ public class Product  implements Serializable {
         this.id = id;
     }
 
-    @Id
     public Long getId() {
         return id;
     }

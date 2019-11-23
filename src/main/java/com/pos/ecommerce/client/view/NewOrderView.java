@@ -1,6 +1,8 @@
 package com.pos.ecommerce.client.view;
 
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.editor.client.Editor;
+import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.ScrollPanel;
 import com.pos.ecommerce.client.constants.HeaderConstanst;
@@ -16,13 +18,17 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
+import com.pos.ecommerce.client.presenter.ValidatorBlank;
 import org.gwtbootstrap3.client.ui.*;
 import org.gwtbootstrap3.client.ui.base.form.AbstractForm;
 import org.gwtbootstrap3.client.ui.constants.*;
+import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
+import org.gwtbootstrap3.client.ui.form.validator.Validator;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.gwt.DataGrid;
 import org.gwtbootstrap3.client.ui.gwt.FlowPanel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class NewOrderView implements NewOrderPresenterGuest.Display {
@@ -87,6 +93,8 @@ public class NewOrderView implements NewOrderPresenterGuest.Display {
         buttonMakeOrder = new Button("Confirmar orden");
         buttonCancelOrder = new Button("Cancelar orden");
         buttonCancelOrder.setType(ButtonType.DANGER);
+        buttonCancelOrder.addStyleName("letra-Carrito");
+        buttonMakeOrder.addStyleName("letra-Carrito");
         buttonMakeOrder.setType(ButtonType.PRIMARY);
         textBoxDiscount = new TextBox();
         textBoxDiscount.setSize(InputSize.SMALL);
@@ -105,6 +113,7 @@ public class NewOrderView implements NewOrderPresenterGuest.Display {
         modalCart.setSize(ModalSize.LARGE);
         Panel panel = new Panel();
         PanelBody modalBody = new PanelBody();
+        modalBody.addStyleName("letra-Carrito");
         heading = new Heading(HeadingSize.H3);
         Icon icon = new Icon(IconType.SHOPPING_CART);
         icon.setPull(Pull.LEFT);
@@ -237,7 +246,6 @@ public class NewOrderView implements NewOrderPresenterGuest.Display {
             }
         });
         dniUSerCart = new TextBox();
-        dniUSerCart.setAllowBlank(false);
         nameUserCart.getElement().getStyle().setFontSize(12, Style.Unit.PX);
         emailUserCart.getElement().getStyle().setFontSize(12, Style.Unit.PX);
         domUserCart.getElement().getStyle().setFontSize(12, Style.Unit.PX);
@@ -268,14 +276,79 @@ public class NewOrderView implements NewOrderPresenterGuest.Display {
         panelClient = new FlowPanel();
         fieldSetUser = new FieldSet();
         formUser = new Form();
-        formUser.setType(FormType.INLINE);
         formUser.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
-        createFormGroup("Nombre y apellido:",nameUserCart,fieldSetUser);
-        createFormGroup("Email:",emailUserCart, fieldSetUser);
-        createFormGroup("Documento:",dniUSerCart, fieldSetUser);
-        createFormGroup("Domicilio:",domUserCart, fieldSetUser);
+        nameUserCart.addKeyUpHandler(e->{
+           if (e.getNativeKeyCode()==KeyCodes.KEY_TAB){
+               formUser.validate();
+           }
+        });
+        FormGroup formGroup = new FormGroup();
+        HelpBlock h1 = new HelpBlock();
+        formGroup.add(nameUserCart);
+        formGroup.add(h1);
+        formGroup.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+        nameUserCart.addValidator(new ValidatorBlank());
+
+
+        FormGroup formGroup1 = new FormGroup();
+        HelpBlock h2 = new HelpBlock();
+        formGroup1.add(domUserCart);
+        formGroup1.add(h2);
+        formGroup1.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+        domUserCart.addKeyUpHandler(e->{
+            if (e.getNativeKeyCode()==KeyCodes.KEY_TAB){
+                formUser.validate();
+            }
+        });
+        FormGroup formGroup3 = new FormGroup();
+        HelpBlock h3 = new HelpBlock();
+        formGroup3.add(dniUSerCart);
+        formGroup3.add(h3);
+        formGroup3.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+
+        dniUSerCart.addKeyUpHandler(e->{
+            if (e.getNativeKeyCode()==KeyCodes.KEY_TAB){
+                formUser.validate();
+            }
+        });
+        FormGroup formGroup4 = new FormGroup();
+        HelpBlock h4 = new HelpBlock();
+        formGroup4.add(emailUserCart);
+        formGroup4.add(h4);
+        formGroup4.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+
+        emailUserCart.addValueChangeHandler(e->{
+            formUser.validate();
+        });
+        emailUserCart.addValidator(new Validator<String>() {
+            @Override
+            public int getPriority() {
+                return Priority.MEDIUM;
+            }
+
+            @Override
+            public List<EditorError> validate(Editor<String> editor, String s) {
+                List<EditorError> result = new ArrayList<EditorError>();
+                String valueStr = s == null ? "" : s.toString();
+                if (valueStr.isEmpty()) {
+                    result.add(new BasicEditorError(editor, s, "Complete este campo"));
+                    return result;
+                }
+                String regex = "^[\\w-_\\.+]*[\\w-_\\.]\\@([\\w]+\\.)+[\\w]+[\\w]$";
+                boolean matches = s.matches(regex);
+                if (!matches){
+                    result.add(new BasicEditorError(editor, s, "El email no es valido."));
+                }
+                return result;
+            }
+        });
+        createFormGroup("Nombre y apellido:",formGroup,fieldSetUser);
+        createFormGroup("Email:",formGroup4, fieldSetUser);
+        createFormGroup("Documento:",formGroup3, fieldSetUser);
+        createFormGroup("Domicilio:",formGroup1, fieldSetUser);
 
         formUser.add(fieldSetUser);
+
         panelClient.add(formUser);
         ButtonGroup buttonGroup = new ButtonGroup();
         clearClient = new Button();
@@ -335,33 +408,11 @@ public class NewOrderView implements NewOrderPresenterGuest.Display {
         FormLabel formLabel = new FormLabel();
         formLabel.setText(field);
         formLabel.getElement().getStyle().setFontSize(12, Style.Unit.PX);
-        formLabel.setFor("form");
         formLabel.setMarginTop(5);
         formLabel.addStyleName("col-sm-6");
-        org.gwtbootstrap3.client.ui.gwt.FlowPanel flowPanel = new org.gwtbootstrap3.client.ui.gwt.FlowPanel();
-        flowPanel.add(formControlStatic);
-        formControlStatic.addStyleName("col-sm-5");
+        formControlStatic.addStyleName("col-sm-6");
         fieldSet.add(formLabel);
         fieldSet.add(formControlStatic);
-        return fieldSet;
-    }
-    private IsWidget createFormGroup(String field, Widget formControlStatic, HelpBlock helpBlock,FieldSet fieldSet) {
-        FormLabel formLabel = new FormLabel();
-        formLabel.setText(field);
-        formLabel.getElement().getStyle().setFontSize(12, Style.Unit.PX);
-        formLabel.setFor("form");
-        formLabel.setMarginTop(5);
-        formLabel.addStyleName("col-sm-5");
-        org.gwtbootstrap3.client.ui.gwt.FlowPanel flowPanel = new org.gwtbootstrap3.client.ui.gwt.FlowPanel();
-        flowPanel.add(formControlStatic);
-        flowPanel.add(helpBlock);
-        formControlStatic.addStyleName("col-sm-3 col-md-7");
-        FormGroup formGroup = new FormGroup();
-        formGroup.add(formLabel);
-
-        fieldSet.add(formLabel);
-        fieldSet.add(formControlStatic);
-        //  fieldSet.addStyleName("col-sm-3 col-md-7");
         return fieldSet;
     }
     private Widget panelSearch() {
@@ -594,6 +645,11 @@ public class NewOrderView implements NewOrderPresenterGuest.Display {
     @Override
     public Form getFormClient() {
         return formUser;
+    }
+
+    @Override
+    public TextBox getTextBoxDom() {
+        return domUserCart;
     }
 
     @Override

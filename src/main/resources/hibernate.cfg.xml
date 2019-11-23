@@ -8,17 +8,17 @@
         <property name="hibernate.show_sql">true</property>
         <property name="hibernate.format_sql">true</property>
         <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/pos-ecommerce</property>
-        <property name="hibernate.connection.driver_class">com.mysql.jdbc.Driver</property>
+        <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
         <property name="hibernate.connection.username">root</property>
         <property name="hibernate.connection.password">admin</property>
-        <property name="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</property>
+        <property name="dialect">org.hibernate.dialect.MySQL5Dialect</property>
         <property name="connection.pool_size">10</property>
         <property name="hibernate.hbm2ddl.auto">update</property>
         <!--<property name="hibernate.hbm2ddl.auto">create-drop</property>-->
 
+        <mapping class="com.pos.ecommerce.client.entitites.Product"/>
         <mapping class="com.pos.ecommerce.client.entitites.User"/>
         <mapping class="com.pos.ecommerce.client.entitites.Client"/>
-        <mapping class="com.pos.ecommerce.client.entitites.Product"/>
         <mapping class="com.pos.ecommerce.client.entitites.Item"/>
         <mapping class="com.pos.ecommerce.client.entitites.Order"/>
 

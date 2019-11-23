@@ -32,7 +32,7 @@ public class ItemOrderView extends Composite {
         button = new Button();
         button.setMarginTop(5);
         cant = new TextBox();
-        cant.setValue(String.valueOf(r.getQuantity()));
+        cant.setValue(String.valueOf(1));
         cant.setSize(InputSize.SMALL);
         cant.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
         InputGroup group = new InputGroup();

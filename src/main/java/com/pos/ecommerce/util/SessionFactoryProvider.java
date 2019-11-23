@@ -26,7 +26,7 @@ public class SessionFactoryProvider {
     private SessionFactoryProvider() {
         Configuration configuration = new Configuration();
         configuration.configure("hibernate.cfg.xml");
-        this.sessionFactory = configuration.buildSessionFactory();
+        this.sessionFactory = configuration .buildSessionFactory();
     }
 
     public SessionFactory createSession() {

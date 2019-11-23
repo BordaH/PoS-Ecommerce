@@ -9,15 +9,16 @@ public class Client implements Serializable {
 
     @Id
     @GeneratedValue(strategy=GenerationType.IDENTITY)
-    protected Long id;
 
-    protected String email = "";
-    protected String lastName = "";
-    protected String firstName = "";
-    protected String phone = "";
-    protected String dom = "";
-    protected String dni = "";
-    protected boolean guest = false;
+    private Long id;
+
+    private String email = "";
+    private String lastName = "";
+    private String firstName = "";
+    private String phone = "";
+    private String dom = "";
+    private String dni = "";
+    private boolean guest = false;
 
     public Client() {
 
@@ -28,13 +29,6 @@ public class Client implements Serializable {
         this.lastName = lastName;
         this.email = email;
         this.dni = dni;
-        this.dom = dom;
-        this.phone = phone;
-    }
-
-    public Client(String name, String email, String dom, String phone) {
-        this.firstName = name;
-        this.email = email;
         this.dom = dom;
         this.phone = phone;
     }

@@ -1,6 +1,8 @@
 package com.pos.ecommerce.client.presenter;
 
 import com.google.gwt.cell.client.FieldUpdater;
+import com.google.gwt.cell.client.HasCell;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.EditorError;
 import com.google.gwt.event.dom.client.DoubleClickEvent;
@@ -20,12 +22,16 @@ import com.pos.ecommerce.client.EcommerceServiceAsync;
 import com.pos.ecommerce.client.dto.ItemDTO;
 import com.pos.ecommerce.client.dto.OrderDTO;
 import com.pos.ecommerce.client.dto.UserDTO;
+import com.pos.ecommerce.client.entitites.exceptions.CreateException;
+import com.pos.ecommerce.client.entitites.exceptions.SaveOrderException;
 import com.pos.ecommerce.client.events.OrderEvent;
 import com.pos.ecommerce.client.events.OrdersEvent;
-import com.pos.ecommerce.client.events.UpdateCart;
+import com.pos.ecommerce.client.events.UpdateCartEvent;
 import com.pos.ecommerce.client.view.ItemOrderView;
 import com.pos.ecommerce.client.view.NewOrderView;
+import com.pos.ecommerce.client.view.ShowMessage;
 import org.gwtbootstrap3.client.ui.*;
+import org.gwtbootstrap3.client.ui.constants.ButtonSize;
 import org.gwtbootstrap3.client.ui.constants.ButtonType;
 import org.gwtbootstrap3.client.ui.form.error.BasicEditorError;
 import org.gwtbootstrap3.client.ui.form.validator.Validator;
@@ -113,6 +119,8 @@ public class NewOrderPresenter implements Presenter {
         Heading getHeadinCart();
 
         Form getFormClient();
+
+        TextBox getTextBoxDom();
     }
     public NewOrderPresenter() {
 
@@ -122,13 +130,10 @@ public class NewOrderPresenter implements Presenter {
         this.rpcEcommerce = rpcEcommerce;
         this.eventBus = eventBus;
         this.order = new OrderDTO();
-        if (!eventBus.isEventHandled(UpdateCart.TYPE)){
-            eventBus.addHandler(UpdateCart.TYPE, updateCart -> updateCart(updateCart.getMessage()));
-        }
         bind();
     }
 
-    protected void updateCart(String message) {
+    public void updateCart(String message) {
         applyDiscount(String.valueOf(order.getDisount()));
         display.setItems(order.getItems());
         Double total = order.getTotal();
@@ -160,33 +165,17 @@ public class NewOrderPresenter implements Presenter {
         boolean b = name.matches(".*\\d.*");
         boolean b1 = name.isEmpty();
         if (b || b1){
+            display.getFormClient().validate();
             throw new Exception("Revise los campos nombre y/o apellido");
         }
         return !b1 && !b;
     }
     protected void bind() {
-        display.getTextBoxEmail().addValidator(new Validator<String>() {
-            @Override
-            public int getPriority() {
-                return Priority.MEDIUM;
-            }
-
-            @Override
-            public List<EditorError> validate(Editor<String> editor, String s) {
-                List<EditorError> result = new ArrayList<EditorError>();
-                String valueStr = s == null ? "" : s;
-                if (!("Yes".equalsIgnoreCase(valueStr) || "No".equalsIgnoreCase(valueStr))) {
-                    result.add(new BasicEditorError(display.getTextBoxEmail(), s, "Must be \"Yes\" or \"No\""));
-                }
-
-                return result;
-            }
-        });
         display.getButtonClearClient().addClickHandler(e->removeDataClient());
         display.getTextBoxDiscount().addKeyUpHandler(e->{
             if(!display.getTextBoxDiscount().getValue().isEmpty() && e.getNativeKeyCode()==KeyCodes.KEY_ENTER){
                 applyDiscount(display.getTextBoxDiscount().getValue());
-                eventBus.fireEvent(new UpdateCart(""));
+                eventBus.fireEvent(new UpdateCartEvent(""));
                 display.getTextBoxDiscount().setText("");
             }
         });
@@ -194,18 +183,18 @@ public class NewOrderPresenter implements Presenter {
             @Override
             public void update(int index, ItemDTO object, String value) {
                 order.removeItem(object);
-                eventBus.fireEvent(new UpdateCart("Producto eliminado"));
+                eventBus.fireEvent(new UpdateCartEvent("Producto eliminado"));
             }
         });
         display.getColumnQuantity().setFieldUpdater(new FieldUpdater<ItemDTO, String>() {
             @Override
             public void update(int index, ItemDTO object, String value) {
                 order.getItems().get(index).setQuantity(Integer.valueOf(value));
-                eventBus.fireEvent(new UpdateCart(""));
+                eventBus.fireEvent(new UpdateCartEvent(""));
             }
         });
         display.getButtonMakeOrder().addClickHandler(e->{
-            sendOrder(order);
+            showPaymentMethod();
         });
         display.getButtonCancelOrder().addClickHandler(e->{
             display.getModalCart().hide();
@@ -242,6 +231,54 @@ public class NewOrderPresenter implements Presenter {
         });
     }
 
+    private void showPaymentMethod() {
+        Modal modal = new Modal();
+        ModalBody modalBody = new ModalBody();
+        ModalFooter modalFooter = new ModalFooter();
+        Form form = new Form();
+        FieldSet fieldSet = new FieldSet();
+        FormControlStatic formControlStatic = new FormControlStatic();
+        formControlStatic.setText("Total:");
+        FormLabel  formLabel = new FormLabel();
+        formLabel.setText("$"+order.getTotal());
+        FormGroup formGroup = new FormGroup();
+        formGroup.add(formControlStatic);
+        formGroup.add(formLabel);
+        Button onlyConfirm =new Button("Efectivo");
+        onlyConfirm.addClickHandler(e->{modal.hide();sendOrder(order);});
+        Button mp = new Button("MercadoPago");
+        mp.addClickHandler(e->{modal.hide();sendOrderMP(order);});
+        fieldSet.add(formGroup);
+        form.add(fieldSet);
+        modalBody.add(form);
+        modalFooter.add(onlyConfirm);
+        modalFooter.add(mp);
+
+        modal.add(modalBody);
+        modal.add(modalFooter);
+        modal.show();
+    }
+
+    private void sendOrderMP(OrderDTO order) {
+        if (checkData(order)) return;
+        if(order.getUser()!=null && order.getItems()!=null && !order.getItems().isEmpty()){
+            rpcEcommerce.sendOrderMP(order, new AsyncCallback<String>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                    ShowMessage.show(caught.getMessage());
+                    caught.printStackTrace();
+                }
+
+                @Override
+                public void onSuccess(String result) {
+                    Window.alert(result);
+                    Window.Location.replace(result);
+
+                }
+            });
+        }
+    }
+
     private void showClients() {
         display.getModalUsers().show();
     }
@@ -262,66 +299,92 @@ public class NewOrderPresenter implements Presenter {
     }
 
 
-    private UserDTO createUser(String nameValue, String emailValue, String docValue, String phoneValue) {
+    private UserDTO createUser(String nameValue, String emailValue, String docValue, String phoneValue, String value) {
         UserDTO user = new UserDTO();
         user.setFirstName(nameValue);
         user.setEmail(emailValue);
         user.setDni(docValue);
         user.setPhone(phoneValue);
         user.setGuest(true);
-        setDataClient(user);
+        user.setDom(value);
         return user;
     }
 
     protected void cancelOrder() {
-        if (Window.confirm("Seguro que quiere cancelar el pedido?")){
+        Modal modal = new Modal();
+        ModalBody modalBody = new ModalBody();
+        modalBody.add(new Paragraph("Seguro que quiere cancelar el pedido?"));
+        ModalFooter modalFooter = new ModalFooter();
+        Button ok = new Button("SI");
+        ok.setType(ButtonType.PRIMARY);
+        ok.setSize(ButtonSize.SMALL);
+        Button not=new Button("NO");
+        not.setSize(ButtonSize.SMALL);
+        not.setType(ButtonType.DANGER);
+        ok.addClickHandler(e->{
+            modal.hide();
             eventBus.fireEvent(new OrderEvent(false));
-        }
+        });
+        not.addClickHandler(e->modal.hide());
+        modalFooter.add(ok);
+        modalFooter.add(not);
+        modal.add(modalBody);
+        modal.add(modalFooter);
+        modal.show();
     }
 
     private void sendOrder(OrderDTO order) {
+        if (checkData(order)) return;
+        if(order.getUser()!=null && order.getItems()!=null && !order.getItems().isEmpty()){
+            try {
+                rpcEcommerce.sendOrder(order, new AsyncCallback<OrderDTO>() {
+                    @Override
+                    public void onFailure(Throwable caught) {
+                            ShowMessage.show(caught.getMessage());
+                    }
+
+                    @Override
+                    public void onSuccess(OrderDTO result) {
+                        if (result!=null){
+                            Modal modal = new Modal();
+                            modal.setTitle("¡Ecommerce!");
+                            ModalBody modalBody = new ModalBody();
+                            modalBody.add(new Paragraph("El pedido se envió y confirmó correctamente"));
+                            modal.add(modalBody);
+                            modal.addHideHandler(e->{
+                                Window.Location.reload();
+                                eventBus.fireEvent(new OrdersEvent());
+                            });
+                            modal.show();
+                        }
+                    }
+                });
+            } catch (CreateException e) {
+                ShowMessage.show(e.getMessage());
+            } catch (SaveOrderException e) {
+                ShowMessage.show(e.getMessage());
+            }
+        }else {
+            display.getModalCart().hide();
+            showMessage("Revise que haya agregado un usuario o un producto al pedido.");
+        }
+    }
+
+    private boolean checkData(OrderDTO order) {
         if (order.getUser()==null){
             try {
                 String name = display.getTextBoxName().getValue();
                 String email = display.getTextBoxEmail().getValue();
                 String phone = display.getTextBoxPhone().getValue();
                 if (isInputValid(name)){
-                        order.setUser(createUser(name,email,display.getTextBoxDni().getValue(),phone));
+                        order.setUser(createUser(name,email,display.getTextBoxDni().getValue(),phone,display.getTextBoxDom().getValue()));
                 }
             } catch (Exception e) {
-                Window.alert(e.getMessage());
-                e.printStackTrace();
-                return;
+                ShowMessage.show(e.getMessage());
+                return true;
             }
         }
-        if(order.getUser()!=null && order.getItems()!=null && !order.getItems().isEmpty()){
-            display.getModalCart().hide();
-            rpcEcommerce.sendOrder(order, new AsyncCallback<OrderDTO>() {
-                @Override
-                public void onFailure(Throwable caught) {
-                    caught.printStackTrace();
-                }
-
-                @Override
-                public void onSuccess(OrderDTO result) {
-                    if (result!=null){
-                        Modal modal = new Modal();
-                        modal.setTitle("¡Ecommerce!");
-                        ModalBody modalBody = new ModalBody();
-                        modalBody.add(new Paragraph("El pedido se envió y confirmó correctamente"));
-                        modal.add(modalBody);
-                        modal.addHideHandler(e->{
-                            Window.Location.reload();
-                            eventBus.fireEvent(new OrdersEvent());
-                        });
-                        modal.show();
-                    }
-                }
-            });
-        }else {
-            display.getModalCart().hide();
-            showMessage("Revise que haya agregado un usuario o un producto al pedido.");
-        }
+        return false;
     }
 
     protected void showMessage(String s) {
@@ -392,9 +455,9 @@ public class NewOrderPresenter implements Presenter {
                 itemOrder.getTextBoxQuantity().setValue("1");
                 addInCart(r);
             });
-            flowPanel.addStyleName("col-sm-4 col-md-3");
+            itemOrder.addStyleName("col-sm-4 col-md-3");
             flowPanel.add(itemOrder);
-            row.add(flowPanel);
+            row.add(itemOrder);
 
         });
         display.showItems(row);
@@ -408,7 +471,7 @@ public class NewOrderPresenter implements Presenter {
             order.getItems().remove(first.get());
         }
         order.getItems().add(item);
-       eventBus.fireEvent(new UpdateCart(s));
+       eventBus.fireEvent(new UpdateCartEvent(s));
     }
 
     @Override

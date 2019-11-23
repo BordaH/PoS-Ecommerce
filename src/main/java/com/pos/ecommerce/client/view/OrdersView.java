@@ -32,6 +32,7 @@ public class OrdersView implements OrdersPresenter.Display {
         buttonLoad = new Button("Confirmar pedido");
         buttonLoad.setType(ButtonType.PRIMARY);
         buttonLoad.setSize(ButtonSize.SMALL);
+        buttonLoad.setEnabled(false);
         Legend heading = new Legend();
         heading.setText("Pedidos");
         heading.setMarginLeft(4);

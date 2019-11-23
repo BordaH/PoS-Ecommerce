@@ -9,7 +9,7 @@ import java.io.Serializable;
 public class User  implements Serializable {
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
     protected Long id;
 
     protected String email = "";

@@ -11,8 +11,8 @@ import java.io.Serializable;
 public class Item  implements IsSerializable {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private String id;
+    @GeneratedValue(strategy=GenerationType.IDENTITY)
+    private Long id;
     private  String name;
     private  String code;
     private  Double price;
@@ -67,12 +67,12 @@ public class Item  implements IsSerializable {
         return price*quantity;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    @Id
-    public String getId() {
+
+    public Long getId() {
         return id;
     }
 }

@@ -130,4 +130,8 @@ public class UserDTO implements Serializable {
             this.id = id;
         }
     }
+
+    public String getFullName() {
+        return firstName.concat(" ").concat(lastName);
+    }
 }

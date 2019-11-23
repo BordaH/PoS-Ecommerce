@@ -1,5 +1,6 @@
 package com.pos.ecommerce.client.presenter;
 
+import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.pos.ecommerce.client.*;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
@@ -13,11 +14,9 @@ import com.google.gwt.user.client.ui.Widget;
 import com.pos.ecommerce.client.dto.UserDTO;
 import com.pos.ecommerce.client.events.OrderEvent;
 import com.pos.ecommerce.client.events.OrdersEvent;
+import com.pos.ecommerce.client.events.StockEvent;
 import com.pos.ecommerce.client.view.MenuView;
-import org.gwtbootstrap3.client.ui.AnchorListItem;
-import org.gwtbootstrap3.client.ui.Button;
-import org.gwtbootstrap3.client.ui.Modal;
-import org.gwtbootstrap3.client.ui.TextBox;
+import org.gwtbootstrap3.client.ui.*;
 
 public class MenuPresenter implements Presenter {
 
@@ -60,6 +59,10 @@ public class MenuPresenter implements Presenter {
         TextBox getTextBoxEmail();
 
         TextBox getTextBoxPassword();
+
+        AnchorListItem getButtonStock();
+
+        HelpBlock getHelpblock();
     }
     public MenuPresenter(MenuView display, EcommerceServiceAsync rpcEcommerce, HandlerManager eventBus, boolean login) {
         this.display = display;
@@ -80,6 +83,11 @@ public class MenuPresenter implements Presenter {
         display.getButtonOrder().addClickHandler(e->newOrder());
         display.getButtonOrders().addClickHandler(e->orders());
         display.getButtonLogOut().addClickHandler(e->logOut());
+        display.getButtonStock().addClickHandler(e->stock());
+    }
+
+    private void stock() {
+        eventBus.fireEvent(new StockEvent());
     }
 
     private void logOut() {
@@ -139,7 +147,8 @@ public class MenuPresenter implements Presenter {
         rpcEcommerce.login(display.getEmail().getValue(),display.getPassword().getValue(), new AsyncCallback<String>() {
             @Override
             public void onFailure(Throwable caught) {
-                Window.alert(caught.getMessage());
+                display.getHelpblock().setError(caught.getMessage());
+                display.getHelpblock().setColor("red");
             }
 
             @Override

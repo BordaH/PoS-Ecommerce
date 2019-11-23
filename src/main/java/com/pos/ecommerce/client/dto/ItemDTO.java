@@ -52,7 +52,7 @@ public class ItemDTO implements Serializable {
         return quantity;
     }
 
-    public Double getTotal() {
+    public double getTotal() {
         return price*quantity;
     }
 

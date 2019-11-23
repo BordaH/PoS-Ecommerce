@@ -13,17 +13,16 @@ import java.util.stream.DoubleStream;
 
 @Entity
 @Table(name = "orders")
-public class Order  implements IsSerializable {
+public class Order  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name="code", unique=true, nullable=false)
     private Long code;
 
     @ManyToOne(targetEntity=Client.class, cascade=CascadeType.ALL)
     private Client user ;
     private  String note="";
 
-    @OneToMany(cascade=CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name="order_id")
     private List<Item> items= new ArrayList<>();
 

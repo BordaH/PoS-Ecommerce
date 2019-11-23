@@ -36,7 +36,18 @@ public class AppController implements ValueChangeHandler<String> {
         eventBus.addHandler(MenuEvent.TYPE, menuEvent -> doMenu());
         eventBus.addHandler(LoginEvent.TYPE, loginEvent -> doLogin());
         eventBus.addHandler(OrdersEvent.TYPE,ordersEvent -> doOrders());
+        eventBus.addHandler(StockEvent.TYPE, stockEvent -> stock());
         eventBus.addHandler(OrderEvent.TYPE,orderEvent -> doOrder(orderEvent.guest));
+        eventBus.addHandler(UpdateCartEvent.TYPE, updateCart -> updateCart(updateCart.msg));
+    }
+
+    private void stock() {
+        presenter = new StockPresenter(new StockView(),rpcEcommerce,eventBus);
+        presenter.go(rootPanel);
+    }
+
+    private void updateCart(String msg) {
+        ((NewOrderPresenter) presenter).updateCart(msg);
     }
 
     private void doLogin() {

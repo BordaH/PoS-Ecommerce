@@ -10,9 +10,11 @@ import com.google.gwt.user.client.ui.Widget;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.SingleSelectionModel;
 import com.pos.ecommerce.client.dto.OrderDTO;
+import com.pos.ecommerce.client.entitites.exceptions.SaveOrderException;
 import com.pos.ecommerce.client.events.OrdersEvent;
 import com.pos.ecommerce.client.view.OrderView;
 import com.pos.ecommerce.client.view.OrdersView;
+import com.pos.ecommerce.client.view.ShowMessage;
 import org.gwtbootstrap3.client.ui.*;
 import org.gwtbootstrap3.client.ui.gwt.CellTable;
 import org.gwtbootstrap3.client.ui.html.Paragraph;
@@ -77,29 +79,33 @@ public class OrdersPresenter implements Presenter {
     }
 
     private void loadOrder(OrderDTO order) {
-        rpcEcommerce.confirmOrder(order, new AsyncCallback<OrderDTO>() {
-            @Override
-            public void onFailure(Throwable caught) {
-                    caught.printStackTrace();
-            }
-
-            @Override
-            public void onSuccess(OrderDTO result) {
-                Modal modal = new Modal();
-                ModalBody modalBody = new ModalBody();
-                modal.add(modalBody);
-                modal.setSize(ModalSize.SMALL);
-                if (result.getConfirm()){
-                    Paragraph paragraph = new Paragraph("El pedido "+result.getCode()+ " se ha confirmado");
-                    modalBody.add(paragraph);
-                }else {
-                    Paragraph paragraph = new Paragraph("No se pudo confirmar el pedido");
-                    modalBody.add(paragraph);
+        try {
+            rpcEcommerce.confirmOrder(order, new AsyncCallback<OrderDTO>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                        caught.printStackTrace();
                 }
-                modal.show();
-                modal.addHideHandler(e->eventBus.fireEvent(new OrdersEvent()));
-            }
-        });
+
+                @Override
+                public void onSuccess(OrderDTO result) {
+                    Modal modal = new Modal();
+                    ModalBody modalBody = new ModalBody();
+                    modal.add(modalBody);
+                    modal.setSize(ModalSize.SMALL);
+                    if (result.getConfirm()){
+                        Paragraph paragraph = new Paragraph("El pedido "+result.getCode()+ " se ha confirmado");
+                        modalBody.add(paragraph);
+                    }else {
+                        Paragraph paragraph = new Paragraph("No se pudo confirmar el pedido");
+                        modalBody.add(paragraph);
+                    }
+                    modal.show();
+                    modal.addHideHandler(e->eventBus.fireEvent(new OrdersEvent()));
+                }
+            });
+        } catch (SaveOrderException e) {
+            ShowMessage.show(e.getMessage());
+        }
     }
 
     private void search(String value) {
